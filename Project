@@ -1,0 +1,217 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.*;
+import java.io.FileWriter;
+import java.io.IOException;
+
+
+public class Project{
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        Car car = new Car("Toyota Camry", 4, 12.0);
+
+
+        Driver driver = new Driver("John", car);
+		double totalCost=0;
+		
+        System.out.println("Enter the number of passengers: ");
+        int numberOfPassengers = Integer.parseInt(scanner.nextLine());
+
+        
+	    if(numberOfPassengers<=car.getNumberOfSeats()){
+	    for (int i = 0; i < numberOfPassengers; i++) {
+            System.out.println("Enter passenger name: ");
+            String name = scanner.nextLine();
+
+            System.out.println("Enter pickup location: ");
+            String pickupLocation = scanner.nextLine();
+
+            System.out.println("Enter drop location: ");
+            String dropLocation = scanner.nextLine();
+
+            System.out.println("Enter distance traveled (in km): ");
+            double km = Double.parseDouble(scanner.nextLine());
+			
+            
+            Passenger passenger = new Passenger(name, pickupLocation, dropLocation, km);
+            driver.getCar().addPassenger(passenger);
+        }
+              for (Passenger passenger : driver.getCar().getPassengers()) {
+            double perPassengerCost = driver.calculateTripCost(passenger.getKm());
+			totalCost =totalCost+perPassengerCost ;
+            passenger.setCost(perPassengerCost);
+        }
+
+       
+        System.out.println("Driver: " + driver.getName());
+        System.out.println("Car Model: " + car.getModel());
+        System.out.println("Number of Seats Available: " + (car.getNumberOfSeats() - car.getPassengers().size()));
+        System.out.println("Passengers in Car: " + car.getPassengers().size());
+        System.out.println("Total Cost: " + totalCost);
+
+        System.out.println("\nPassenger Details and Cost:");
+        for (Passenger passenger : driver.getCar().getPassengers()) {
+            System.out.println("Name: " + passenger.getName());
+            System.out.println("Pickup Location: " + passenger.getPickupLocation());
+            System.out.println("Drop Location: " + passenger.getDropLocation());
+            System.out.println("Cost: " + passenger.getCost());
+            System.out.println("-----------------------");
+        }
+
+       
+        try {
+            writeCarpoolingDataToFile(driver, car, totalCost);
+        } catch (IOException e) {
+            System.out.println("Error occurred while writing carpooling data to a file.");
+            e.printStackTrace();
+        }
+	}
+	else{
+	System.out.println("Car allows only 4 passengers");
+	}
+        
+        scanner.close();
+    }
+
+    
+    public static void writeCarpoolingDataToFile(Driver driver, Car car, double totalCost) throws IOException {
+        FileWriter writer = new FileWriter("carpooling_data.txt");
+
+       
+        writer.write("Driver: " + 
+driver.getName()+ "\n");
+        writer.write("Car Model: " + car.getModel() + "\n");
+        writer.write("Number of Seats Available: " + (car.getNumberOfSeats() - car.getPassengers().size()) + "\n");
+        writer.write("Passengers in Car: " + car.getPassengers().size()+ "\n");
+        
+        writer.write("Total Cost: " + totalCost + "\n");
+
+       
+        writer.write("\nPassenger Details and Cost:\n");
+        for (Passenger passenger : driver.getCar().getPassengers()) {
+            writer.write("Name: " + passenger.getName() + "\n");
+            writer.write("Pickup Location: " + passenger.getPickupLocation() + "\n");
+            writer.write("Drop Location: " +passenger.getDropLocation() + "\n");
+            writer.write("Cost: " + (passenger.getCost()) + "\n");
+            writer.write("-----------------------\n");
+        }
+
+        
+        writer.close();
+    }
+}
+class Driver {
+    private String name;
+    private Car car;
+
+    public Driver(String name, Car car) {
+        this.name = name;
+        this.car = car;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Car getCar() {
+        return car;
+    }
+
+    public boolean ownsCar() {
+        return car != null;
+    }
+
+    public double calculateTripCost(double kilometers) {
+        if (car != null) {
+            double cost = (kilometers/car.getMileage())*100;
+           
+            cost += 10.0;
+            return cost;
+        } else {
+            double cost = (kilometers/car.getMileage())*110;
+            cost = kilometers * 0.5; 
+            return cost;
+        }
+    }
+}
+class Car {
+    private String model;
+    private int numberOfSeats;
+    private List<Passenger> passengers;
+    private double mileage;
+
+    public Car(String model, int numberOfSeats, double mileage) {
+        this.model = model;
+        this.numberOfSeats = numberOfSeats;
+        this.mileage = mileage;
+        this.passengers = new ArrayList<>();
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public int getNumberOfSeats() {
+        return numberOfSeats;
+    }
+
+    public double getMileage() {
+        return mileage;
+    }
+
+    public List<Passenger> getPassengers() {
+        return passengers;
+    }
+
+    public boolean isCarFull() {
+        return passengers.size() >= numberOfSeats;
+    }
+
+    public void addPassenger(Passenger passenger) {
+        if (!isCarFull()) {
+            passengers.add(passenger);
+        } else {
+            System.out.println("Car is already full. Cannot add more passengers.");
+        }
+    }
+}
+
+class Passenger {
+    private String name;
+    private String pickupLocation;
+    private String dropLocation;
+    private double cost;
+    private double km;
+
+    public Passenger(String name, String pickupLocation, String dropLocation, double km) {
+        this.name = name;
+        this.pickupLocation = pickupLocation;
+        this.dropLocation = dropLocation;
+        this.km = km;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPickupLocation() {
+        return pickupLocation;
+    }
+
+    public String getDropLocation() {
+        return dropLocation;
+    }
+
+    public void setCost(double cost) {
+        this.cost = cost;
+    }
+
+    public double getCost() {
+        return cost;
+    }
+
+    public double getKm() {
+        return km;
+    }
+}
